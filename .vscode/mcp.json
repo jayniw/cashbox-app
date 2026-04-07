@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "cashbox": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://app_cashbox:D3vC4sh80x%2325@10.45.56.71:5432/cashbox_db"
+      ]
+    }
+  }
+}
