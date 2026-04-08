@@ -1,7 +1,8 @@
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodTypeAny } from 'zod';
 import { cashboxPartnerOpenApi } from '@/app/api/specification/cashbox_partner/route';
 import { cashboxPartnerByIdOpenApi } from '@/app/api/specification/cashbox_partner/[id]/route';
+import { cashboxRoleOpenApi } from '@/app/api/specification/cashbox_role/route';
+import { cashboxRoleByIdOpenApi } from '@/app/api/specification/cashbox_role/[id]/route';
 import { cashboxUserOpenApi } from '@/app/api/specification/cashbox_user/route';
 import { cashboxUserByIdOpenApi } from '@/app/api/specification/cashbox_user/[id]/route';
 
@@ -38,7 +39,7 @@ type OpenApiRoute = {
   operations: Record<string, OpenApiOperation>;
 };
 
-type JsonSchemaObject = {
+type JsonSchemaObject = Record<string, unknown> & {
   $ref?: string;
   $schema?: string;
   definitions?: Record<string, JsonSchemaObject>;
@@ -46,58 +47,137 @@ type JsonSchemaObject = {
   required?: string[];
 };
 
+type ZodRawDef = {
+  type?: string;
+  innerType?: ZodTypeAny;
+  schema?: ZodTypeAny;
+  arg?: ZodTypeAny;
+  options?: unknown[];
+  element?: ZodTypeAny;
+  shape?: unknown;
+  value?: unknown;
+  values?: unknown;
+};
+
+function getZodInnerSchema(def: unknown): ZodTypeAny | undefined {
+  if (def && typeof def === 'object') {
+    const raw = def as ZodRawDef;
+    return (raw.innerType ??
+      raw.schema ??
+      raw.arg ??
+      (Array.isArray(raw.options)
+        ? (raw.options[0] as ZodTypeAny)
+        : undefined) ??
+      raw.element ??
+      raw.type ??
+      raw.shape ??
+      undefined) as ZodTypeAny | undefined;
+  }
+
+  return undefined;
+}
+
+function convertZodSchema(schema: ZodTypeAny): JsonSchemaObject {
+  const def = (schema as { _def?: unknown })._def as ZodRawDef | undefined;
+  if (!def || typeof def.type !== 'string') {
+    return { type: 'object', properties: {} };
+  }
+
+  switch (def.type) {
+    case 'string':
+      return { type: 'string' };
+    case 'number':
+      return { type: 'number' };
+    case 'boolean':
+      return { type: 'boolean' };
+    case 'bigint':
+      return { type: 'integer' };
+    case 'date':
+      return { type: 'string', format: 'date-time' };
+    case 'null':
+      return { type: 'null' };
+    case 'undefined':
+      return { type: 'null' };
+    case 'literal':
+      return { const: def.value, type: typeof def.value };
+    case 'array': {
+      const itemType = def.element ?? getZodInnerSchema(def);
+      return {
+        type: 'array',
+        items: itemType ? convertZodSchema(itemType) : { type: 'string' },
+      };
+    }
+    case 'object': {
+      const rawShape =
+        typeof def.shape === 'function' ? def.shape() : def.shape;
+      const properties: Record<string, JsonSchemaObject> = {};
+      const required: string[] = [];
+
+      if (rawShape && typeof rawShape === 'object') {
+        for (const key of Object.keys(rawShape)) {
+          const childSchema = rawShape[key];
+          if (!childSchema || typeof childSchema !== 'object') continue;
+          properties[key] = convertZodSchema(childSchema as ZodTypeAny);
+          if (!childSchema.isOptional?.()) {
+            required.push(key);
+          }
+        }
+      }
+
+      return {
+        type: 'object',
+        properties,
+        ...(required.length ? { required } : {}),
+      };
+    }
+    case 'optional': {
+      const innerSchema = def.innerType ?? getZodInnerSchema(def);
+      return innerSchema ? convertZodSchema(innerSchema) : { type: 'string' };
+    }
+    case 'nullable': {
+      const innerSchema = def.innerType ?? getZodInnerSchema(def);
+      const inner = innerSchema
+        ? convertZodSchema(innerSchema)
+        : { type: 'string' };
+      return {
+        anyOf: [inner, { type: 'null' }],
+      };
+    }
+    case 'default':
+    case 'effects':
+    case 'pipeline': {
+      const innerSchema = def.innerType ?? def.schema ?? getZodInnerSchema(def);
+      return innerSchema ? convertZodSchema(innerSchema) : { type: 'string' };
+    }
+    case 'union': {
+      const options = (def.options ?? []) as ZodTypeAny[];
+      return { anyOf: options.map((option) => convertZodSchema(option)) };
+    }
+    case 'enum':
+      return { type: 'string', enum: def.values ?? def.options ?? [] };
+    case 'nativeEnum':
+      return { type: 'string', enum: Object.values(def.values ?? {}) };
+    default:
+      return { type: 'string' };
+  }
+}
+
 function dumpSchema(
   schema: ZodTypeAny,
   name: string,
   components: Record<string, unknown>,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const jsonSchema = zodToJsonSchema(schema as unknown as any, {
-    name,
-    target: 'jsonSchema7',
-    $refStrategy: 'root',
-  }) as JsonSchemaObject;
-
-  const definitions = jsonSchema.definitions ?? {};
-  const ref = typeof jsonSchema.$ref === 'string' ? jsonSchema.$ref : undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (jsonSchema as any).definitions;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (jsonSchema as any).$schema;
-
-  for (const [key, value] of Object.entries(definitions)) {
-    components[key] = value;
-  }
-
-  if (ref) {
-    const key = name;
-    if (definitions[key]) {
-      components[key] = definitions[key];
-    } else {
-      components[key] = jsonSchema;
-    }
-    return { $ref: `#/components/schemas/${key}` };
-  }
-
+  const jsonSchema = convertZodSchema(schema);
   components[name] = jsonSchema;
   return { $ref: `#/components/schemas/${name}` };
 }
 
 function buildQueryParameters(schema: ZodTypeAny) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const jsonSchema = zodToJsonSchema(schema as unknown as any, {
-    name: 'Query',
-    target: 'jsonSchema7',
-    $refStrategy: 'root',
-  }) as JsonSchemaObject;
-
-  const definitions = jsonSchema.definitions ?? {};
-  const base = jsonSchema.properties ?? definitions?.Query?.properties ?? {};
+  const jsonSchema = convertZodSchema(schema);
+  const base = jsonSchema.properties ?? {};
   const required = Array.isArray(jsonSchema.required)
     ? jsonSchema.required
-    : Array.isArray(definitions?.Query?.required)
-      ? definitions.Query.required
-      : [];
+    : [];
 
   return Object.entries(base).map(([key, schema]) => ({
     name: key,
@@ -196,6 +276,8 @@ const components = {
 const routes: OpenApiRoute[] = [
   cashboxPartnerOpenApi,
   cashboxPartnerByIdOpenApi,
+  cashboxRoleOpenApi,
+  cashboxRoleByIdOpenApi,
   cashboxUserOpenApi,
   cashboxUserByIdOpenApi,
 ];
