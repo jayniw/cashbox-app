@@ -79,18 +79,16 @@ function parseGeoPoint(value: string | null | undefined) {
 }
 
 export async function createCashboxTerminal(payload: CashboxTerminalCreate) {
-  const terminalData: Record<string, unknown> = {
-    terminal_name: payload.terminalName ?? null,
-    ip_address: payload.ipAddress ?? null,
-    geo_point: parseGeoPoint(payload.geoPoint),
-    geo_url: payload.geoUrl ?? null,
-    is_active: payload.isActive ?? true,
-    user_id: payload.userId ?? null,
-  };
-
   const [created] = await db
     .insert(cashbox_terminalInSpecification)
-    .values(terminalData as any)
+    .values({
+      terminal_name: payload.terminalName ?? null,
+      ip_address: payload.ipAddress ?? null,
+      geo_point: parseGeoPoint(payload.geoPoint),
+      geo_url: payload.geoUrl ?? null,
+      is_active: payload.isActive ?? true,
+      user_id: payload.userId ?? null,
+    })
     .returning();
 
   return mapCashboxTerminal(created);
