@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { parseJsonRequestBody } from '@/lib/api/parseJsonRequest';
 import {
   createCashboxPartner,
   listCashboxPartners,
@@ -27,8 +28,13 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const body = cashboxPartnerCreateSchema.parse(await request.json());
-  const created = await createCashboxPartner(body);
+  const parsed = await parseJsonRequestBody(
+    request,
+    cashboxPartnerCreateSchema,
+  );
+  if (parsed.errorResponse) return parsed.errorResponse;
+
+  const created = await createCashboxPartner(parsed.value);
   return NextResponse.json(created, { status: 201 });
 }
 

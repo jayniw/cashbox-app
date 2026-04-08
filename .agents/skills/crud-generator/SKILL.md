@@ -75,6 +75,7 @@ Y opcionalmente:
    - Implementa `GET(request)` para listar registros usando el servicio.
    - Implementa `POST(request)` para crear un registro usando el servicio.
    - Convierte query params camelCase/snaked_case antes de validar.
+   - Para `POST`, usa un helper compartido de parsing de JSON/Zod, por ejemplo `parseJsonRequestBody(request, schema)` desde `lib/api/parseJsonRequest.ts`, para devolver `400` en JSON inválido o en request body inválido.
    - No pongas lógica de base de datos directa en el route.
    - Retorna `201` con el nuevo registro en POST.
 
@@ -83,6 +84,7 @@ Y opcionalmente:
    - Importa los servicios desde `lib/crud/<schema>/<table_name>.ts`.
    - Implementa `GET`, `PATCH`, `DELETE`.
    - En `PATCH`, valida con el schema de actualización y pasa el body al servicio.
+   - Para `PATCH`, usa el helper compartido `parseJsonRequestBody(request, schema)` para manejar invalid JSON y validación Zod de forma consistente.
    - En `DELETE`, llama al servicio de desactivación y devuelve `204` o `404`.
    - Si no existe el registro, retorna `404` con `{ error: '...' }`.
 

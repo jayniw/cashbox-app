@@ -3,6 +3,8 @@ import { cashboxPartnerOpenApi } from '@/app/api/specification/cashbox_partner/r
 import { cashboxPartnerByIdOpenApi } from '@/app/api/specification/cashbox_partner/[id]/route';
 import { cashboxRoleOpenApi } from '@/app/api/specification/cashbox_role/route';
 import { cashboxRoleByIdOpenApi } from '@/app/api/specification/cashbox_role/[id]/route';
+import { cashboxTerminalOpenApi } from '@/app/api/specification/cashbox_terminal/route';
+import { cashboxTerminalByIdOpenApi } from '@/app/api/specification/cashbox_terminal/[id]/route';
 import { cashboxUserOpenApi } from '@/app/api/specification/cashbox_user/route';
 import { cashboxUserByIdOpenApi } from '@/app/api/specification/cashbox_user/[id]/route';
 
@@ -278,6 +280,8 @@ const routes: OpenApiRoute[] = [
   cashboxPartnerByIdOpenApi,
   cashboxRoleOpenApi,
   cashboxRoleByIdOpenApi,
+  cashboxTerminalOpenApi,
+  cashboxTerminalByIdOpenApi,
   cashboxUserOpenApi,
   cashboxUserByIdOpenApi,
 ];

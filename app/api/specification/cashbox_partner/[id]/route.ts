@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { parseJsonRequestBody } from '@/lib/api/parseJsonRequest';
 import {
   getCashboxPartnerById,
   deactivateCashboxPartner,
@@ -25,9 +26,13 @@ export async function GET(_request: Request, context: Params) {
 
 export async function PATCH(request: Request, context: Params) {
   const { id } = await context.params;
-  const body = cashboxPartnerUpdateSchema.parse(await request.json());
+  const parsed = await parseJsonRequestBody(
+    request,
+    cashboxPartnerUpdateSchema,
+  );
+  if (parsed.errorResponse) return parsed.errorResponse;
 
-  const updated = await updateCashboxPartner(id, body);
+  const updated = await updateCashboxPartner(id, parsed.value);
 
   if (updated === null) {
     return NextResponse.json(

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { parseJsonRequestBody } from '@/lib/api/parseJsonRequest';
 import {
   deactivateCashboxRole,
   getCashboxRoleById,
@@ -25,8 +26,10 @@ export async function GET(_request: Request, context: Params) {
 
 export async function PATCH(request: Request, context: Params) {
   const { id } = await context.params;
-  const body = cashboxRoleUpdateSchema.parse(await request.json());
-  const updated = await updateCashboxRole(id, body);
+  const parsed = await parseJsonRequestBody(request, cashboxRoleUpdateSchema);
+  if (parsed.errorResponse) return parsed.errorResponse;
+
+  const updated = await updateCashboxRole(id, parsed.value);
 
   if (updated === null) {
     return NextResponse.json(
