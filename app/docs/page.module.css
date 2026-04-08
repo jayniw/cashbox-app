@@ -1,0 +1,70 @@
+:global(.swagger-ui *) {
+  color: #0f172a !important;
+}
+
+:global(.swagger-ui),
+:global(.swagger-ui .topbar),
+:global(.swagger-ui .topbar a),
+:global(.swagger-ui .info),
+:global(.swagger-ui .responses-wrapper),
+:global(.swagger-ui .opblock),
+:global(.swagger-ui .opblock-description),
+:global(.swagger-ui .parameter__name),
+:global(.swagger-ui .tab-content),
+:global(.swagger-ui .scheme-container),
+:global(.swagger-ui .json-schema),
+:global(.swagger-ui .schemes),
+:global(.swagger-ui .parameters),
+:global(.swagger-ui .response-col_description),
+:global(.swagger-ui .response-col_status) {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+:global(.swagger-ui .topbar) {
+  background: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+:global(.swagger-ui .opblock) {
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+:global(.swagger-ui .opblock-summary) {
+  background: #f8fafc !important;
+}
+
+:global(.swagger-ui .opblock-header) {
+  border-color: #e2e8f0 !important;
+}
+
+:global(.swagger-ui .btn),
+:global(.swagger-ui .try-out),
+:global(.swagger-ui .execute),
+:global(.swagger-ui .opblock-summary-control) {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+:global(.swagger-ui .opblock-summary-method) {
+  color: #0f172a !important;
+}
+
+:global(.swagger-ui .markdown p),
+:global(.swagger-ui .markdown pre),
+:global(.swagger-ui .markdown code),
+:global(.swagger-ui .info hgroup h1),
+:global(.swagger-ui .info hgroup h2) {
+  color: #0f172a !important;
+}
+
+:global(.swagger-ui pre),
+:global(.swagger-ui pre *) {
+  color: #ffffff !important;
+}
+
+:global(body) {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}

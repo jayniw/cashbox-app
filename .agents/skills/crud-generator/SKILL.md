@@ -9,7 +9,7 @@ Este skill crea un CRUD completo para una tabla especificada siguiendo los linea
 
 ## Cuándo usarlo
 
-Usa este skill cuando necesitas generar desde cero un API REST completo dentro de `app/api/specification/` para una tabla nueva de la base de datos, con:
+Usa este skill cuando necesitas generar desde cero un API REST completo dentro de `app/api/<schema>/` para una tabla nueva de la base de datos, con:
 
 - rutas de listado y creación
 - rutas por ID para leer, actualizar y eliminar
@@ -30,9 +30,10 @@ Usa este skill cuando necesitas generar desde cero un API REST completo dentro d
 
 Para una tabla `foo_bar` debe generar al menos:
 
-- `types/db/specification/fooBar.ts`
-- `app/api/specification/foo_bar/route.ts`
-- `app/api/specification/foo_bar/[id]/route.ts`
+- `types/db/<schema>/fooBar.ts`
+- `lib/crud/<schema>/foo_bar.ts`
+- `app/api/<schema>/foo_bar/route.ts`
+- `app/api/<schema>/foo_bar/[id]/route.ts`
 
 Y opcionalmente:
 
@@ -49,7 +50,7 @@ Y opcionalmente:
    - Identifica el nombre del objeto Drizzle en `lib/schema/schema.ts`.
    - Determina las columnas que deben exponerse y cuáles deben ser opcionales.
 
-2. **Crea los tipos/Zod schemas** en `types/db/specification/<tableName>.ts`
+2. **Crea los tipos/Zod schemas** en `types/db/<schema>/<tableName>.ts`
    - `query` schema para filtros compatibles con camelCase y snake_case.
    - `create` schema para el body de POST.
    - `update` schema para el body de PATCH.
@@ -61,42 +62,52 @@ Y opcionalmente:
    - `fooBarUpdateSchema`
    - `fooBarResponseSchema`
 
-3. **Crea el archivo de rutas principal**
-   - `app/api/specification/<table_name>/route.ts`
-   - Implementa `GET(request)` para listar registros.
-   - Implementa `POST(request)` para crear un registro.
+3. **Extrae la lógica de negocio a un servicio**
+   - Crea `lib/crud/<schema>/<table_name>.ts`.
+   - Implementa funciones de negocio reutilizables:
+     - `list<PascalName>`, `create<PascalName>`, `get<PascalName>ById`, `update<PascalName>`, `deactivate<PascalName>`.
+   - Incluye un mapper de fila SQL a camelCase.
+   - Mantén la lógica de filtro, inserción, actualización y desactivación dentro de este módulo.
+
+4. **Crea el archivo de rutas principal**
+   - `app/api/<schema>/<table_name>/route.ts`
+   - Importa los servicios desde `lib/crud/<schema>/<table_name>.ts`.
+   - Implementa `GET(request)` para listar registros usando el servicio.
+   - Implementa `POST(request)` para crear un registro usando el servicio.
    - Convierte query params camelCase/snaked_case antes de validar.
-   - Mapea la fila SQL a camelCase en la respuesta.
+   - No pongas lógica de base de datos directa en el route.
    - Retorna `201` con el nuevo registro en POST.
 
-4. **Crea el archivo de rutas por ID**
-   - `app/api/specification/<table_name>/[id]/route.ts`
+5. **Crea el archivo de rutas por ID**
+   - `app/api/<schema>/<table_name>/[id]/route.ts`
+   - Importa los servicios desde `lib/crud/<schema>/<table_name>.ts`.
    - Implementa `GET`, `PATCH`, `DELETE`.
-   - En `PATCH`, valida con el schema de actualización y aplica solo campos presentes.
-   - En `DELETE`, haz un borrado suave si la tabla tiene estado, o devuelve `204` si solo se deshabilita.
+   - En `PATCH`, valida con el schema de actualización y pasa el body al servicio.
+   - En `DELETE`, llama al servicio de desactivación y devuelve `204` o `404`.
    - Si no existe el registro, retorna `404` con `{ error: '...' }`.
 
-5. **Usa el objeto Drizzle de `lib/schema/schema.ts`**
-   - Importa el objeto de tabla generado.
-   - Usa `db.select().from(table)` y `db.insert(table)` / `db.update(table)`.
+6. **Usa el objeto Drizzle de `lib/schema/schema.ts` en el servicio**
+   - Importa el objeto de tabla generado en `lib/crud/<schema>/<table_name>.ts`.
+   - Usa `db.select().from(table)` y `db.insert(table)` / `db.update(table)` dentro del servicio.
    - Para filtros `LIKE` y `LOWER(...)`, usa `sql` si hace falta.
+   - Evita poner consultas directas en los route handlers.
 
-6. **Agrega OpenAPI metadata exportada**
+7. **Agrega OpenAPI metadata exportada**
    - Exporta `fooBarOpenApi` en `route.ts`.
    - Exporta `fooBarByIdOpenApi` en `[id]/route.ts`.
    - Incluye `path`, `tag`, `operations`, y `parameters` si aplica.
    - Usa `requestBodySchema`, `responseSchema`, `responseSchemaName`, `querySchema`, etc.
 
-7. **Consistencia de nombres y rutas**
+8. **Consistencia de nombres y rutas**
    - Usa `snake_case` para la ruta de API y el objeto Drizzle.
    - Usa `camelCase` para propiedades expuestas a la API.
    - Mantén `partner` como ejemplo de estilo: `cashboxPartnerId`, `partnerName`, etc.
 
-8. **Pruebas básicas**
+9. **Pruebas básicas**
    - Verifica que `npm run build` compile.
-   - Prueba la ruta `GET /api/specification/<table_name>`.
+   - Prueba la ruta `GET /api/<schema>/<table_name>`.
    - Prueba `POST` con payload válido.
-   - Prueba `GET /api/specification/<table_name>/{id}` y `PATCH`.
+   - Prueba `GET /api/<schema>/<table_name>/{id}` y `PATCH`.
    - Verifica `DELETE` retorna `204` o `404` cuando corresponde.
 
 ## Reglas de estilo
@@ -109,13 +120,72 @@ Y opcionalmente:
 - No expongas objetos internos o columnas no deseadas.
 - Añade solo los campos realmente necesarios al mapper camelCase.
 
+## Ejemplo mínimo de servicio y exportación OpenAPI
+
+### Servicio
+
+En `lib/crud/<schema>/foo_bar.ts`:
+
+```ts
+import { db } from '@/lib/db';
+import { foo_barIn<schema> } from '@/lib/schema/schema';
+import { eq, sql, and } from 'drizzle-orm';
+import type {
+  FooBarCreate,
+  FooBarResponse,
+  FooBarUpdate,
+} from '@/types/db/<schema>/fooBar';
+
+export function mapFooBar(row: Record<string, unknown>): FooBarResponse {
+  return {
+    fooBarId: row.foo_bar_id as string,
+    ...
+  };
+}
+
+export async function listFooBars(filters: { fooName?: string }) {
+  const conditions = [];
+  if (filters.fooName) {
+    conditions.push(
+      sql`LOWER(${foo_barIn<schema>.foo_name}) LIKE ${`%${filters.fooName.toLowerCase()}%`}`,
+    );
+  }
+  const rows = conditions.length
+    ? await db.select().from(foo_barIn<schema>).where(and(...conditions))
+    : await db.select().from(foo_barIn<schema>);
+  return rows.map(mapFooBar);
+}
+```
+
+### Route handler
+
+En `app/api/<schema>/foo_bar/route.ts`:
+
+```ts
+import { NextResponse } from 'next/server';
+import { listFooBars, createFooBar } from '@/lib/crud/<schema>/foo_bar';
+import { fooBarQuerySchema, fooBarCreateSchema } from '@/types/db/<schema>/fooBar';
+
+export async function GET(request: Request) {
+  const queryParams = fooBarQuerySchema.parse({ ... });
+  const items = await listFooBars(queryParams);
+  return NextResponse.json(items);
+}
+
+export async function POST(request: Request) {
+  const body = fooBarCreateSchema.parse(await request.json());
+  const created = await createFooBar(body);
+  return NextResponse.json(created, { status: 201 });
+}
+```
+
 ## Ejemplo mínimo de exportación OpenAPI
 
 En `route.ts`:
 
 ```ts
 export const fooBarOpenApi = {
-  path: '/api/specification/foo_bar',
+  path: '/api/<schema>/foo_bar',
   tag: 'FooBar',
   operations: {
     get: {
@@ -141,7 +211,7 @@ En `[id]/route.ts`:
 
 ```ts
 export const fooBarByIdOpenApi = {
-  path: '/api/specification/foo_bar/{id}',
+  path: '/api/<schema>/foo_bar/{id}',
   tag: 'FooBar',
   parameters: [
     {
