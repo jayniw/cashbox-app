@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { cashbox_partnerInSpecification } from '@/lib/schema/schema';
-import { cashboxPartnerUpdateSchema } from '@/types/db/specification/cashboxPartner';
+import { z } from 'zod';
+import {
+  cashboxPartnerResponseSchema,
+  cashboxPartnerUpdateSchema,
+} from '@/types/db/specification/cashboxPartner';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -65,6 +69,45 @@ export async function PATCH(request: Request, context: Params) {
 
   return NextResponse.json(mapCashboxPartner(updated));
 }
+
+export const cashboxPartnerByIdOpenApi = {
+  path: '/api/specification/cashbox_partner/{id}',
+  tag: 'CashboxPartner',
+  parameters: [
+    {
+      name: 'id',
+      in: 'path',
+      required: true,
+      schema: { type: 'string', format: 'uuid' },
+      description: 'Cashbox partner ID',
+    },
+  ],
+  operations: {
+    get: {
+      summary: 'Get a cashbox partner by ID',
+      responseSchema: cashboxPartnerResponseSchema,
+      responseSchemaName: 'CashboxPartner',
+    },
+    patch: {
+      summary: 'Update a cashbox partner',
+      requestBodySchema: cashboxPartnerUpdateSchema,
+      requestBodySchemaName: 'CashboxPartnerUpdate',
+      responseSchema: cashboxPartnerResponseSchema,
+      responseSchemaName: 'CashboxPartner',
+    },
+    delete: {
+      summary: 'Soft delete a cashbox partner',
+      responses: {
+        '204': { description: 'Cashbox partner deactivated' },
+        '404': {
+          description: 'Cashbox partner not found',
+          schema: z.object({ error: z.string() }),
+          schemaName: 'ErrorResponse',
+        },
+      },
+    },
+  },
+};
 
 export async function DELETE(_request: Request, context: Params) {
   const { id } = await context.params;

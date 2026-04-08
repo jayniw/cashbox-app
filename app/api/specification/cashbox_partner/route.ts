@@ -5,6 +5,7 @@ import { cashbox_partnerInSpecification } from '@/lib/schema/schema';
 import {
   cashboxPartnerCreateSchema,
   cashboxPartnerQuerySchema,
+  cashboxPartnerResponseSchema,
 } from '@/types/db/specification/cashboxPartner';
 
 const mapCashboxPartner = (partner: Record<string, unknown>) => ({
@@ -77,3 +78,26 @@ export async function POST(request: Request) {
 
   return NextResponse.json(mapCashboxPartner(created), { status: 201 });
 }
+
+export const cashboxPartnerOpenApi = {
+  path: '/api/specification/cashbox_partner',
+  tag: 'CashboxPartner',
+  operations: {
+    get: {
+      summary: 'List cashbox partners',
+      description:
+        'Returns a list of cashbox partners. Use optional query parameters to filter results.',
+      querySchema: cashboxPartnerQuerySchema,
+      querySchemaName: 'CashboxPartnerQuery',
+      responseSchema: cashboxPartnerResponseSchema.array(),
+      responseSchemaName: 'CashboxPartnerList',
+    },
+    post: {
+      summary: 'Create a new cashbox partner',
+      requestBodySchema: cashboxPartnerCreateSchema,
+      requestBodySchemaName: 'CashboxPartnerCreate',
+      responseSchema: cashboxPartnerResponseSchema,
+      responseSchemaName: 'CashboxPartner',
+    },
+  },
+};
