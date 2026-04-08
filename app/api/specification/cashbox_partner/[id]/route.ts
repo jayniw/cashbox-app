@@ -72,7 +72,7 @@ export async function PATCH(request: Request, context: Params) {
 
 export const cashboxPartnerByIdOpenApi = {
   path: '/api/specification/cashbox_partner/{id}',
-  tag: 'CashboxPartner',
+  tag: 'CRUD - cashbox partner',
   parameters: [
     {
       name: 'id',

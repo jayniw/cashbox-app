@@ -2,6 +2,8 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodTypeAny } from 'zod';
 import { cashboxPartnerOpenApi } from '@/app/api/specification/cashbox_partner/route';
 import { cashboxPartnerByIdOpenApi } from '@/app/api/specification/cashbox_partner/[id]/route';
+import { cashboxUserOpenApi } from '@/app/api/specification/cashbox_user/route';
+import { cashboxUserByIdOpenApi } from '@/app/api/specification/cashbox_user/[id]/route';
 
 type OpenApiParameter = {
   name: string;
@@ -108,10 +110,15 @@ function buildQueryParameters(schema: ZodTypeAny) {
 function buildOperation(
   operation: OpenApiOperation,
   components: Record<string, unknown>,
+  tag?: string,
 ) {
   const result: Record<string, unknown> = {
     summary: operation.summary,
   };
+
+  if (tag) {
+    result.tags = [tag];
+  }
 
   if (operation.description) {
     result.description = operation.description;
@@ -189,6 +196,8 @@ const components = {
 const routes: OpenApiRoute[] = [
   cashboxPartnerOpenApi,
   cashboxPartnerByIdOpenApi,
+  cashboxUserOpenApi,
+  cashboxUserByIdOpenApi,
 ];
 
 export const openApiSpec = {
@@ -205,7 +214,7 @@ export const openApiSpec = {
         ...Object.fromEntries(
           Object.entries(route.operations).map(([method, operation]) => [
             method,
-            buildOperation(operation, components.schemas),
+            buildOperation(operation, components.schemas, route.tag),
           ]),
         ),
       };

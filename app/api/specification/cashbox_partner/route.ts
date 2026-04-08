@@ -81,7 +81,7 @@ export async function POST(request: Request) {
 
 export const cashboxPartnerOpenApi = {
   path: '/api/specification/cashbox_partner',
-  tag: 'CashboxPartner',
+  tag: 'CRUD - cashbox partner',
   operations: {
     get: {
       summary: 'List cashbox partners',
