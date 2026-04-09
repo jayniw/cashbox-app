@@ -14,7 +14,7 @@ Usa este skill cuando necesitas generar desde cero un API REST completo dentro d
 
 - rutas de listado y creación
 - rutas por ID para leer y actualizar
-- rutas por ID para eliminar sólo si la tabla tiene columna `status` o `is_active`
+- rutas por ID para eliminar sólo si la tabla tiene alguna columna de estado (`status`, `partner_status`, `user_status`, etc.) o `is_active`
 - validación de entrada con Zod
 - mapeo de respuestas a camelCase
 - metadata para OpenAPI/Swagger

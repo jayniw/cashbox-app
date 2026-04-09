@@ -51,25 +51,30 @@ const data = {
     },
   ],
   navMain: [
+    // {
+    //   title: 'Playground',
+    //   url: '#',
+    //   icon: <TerminalSquareIcon />,
+    //   isActive: true,
+    //   items: [
+    //     {
+    //       title: 'History',
+    //       url: '#',
+    //     },
+    //     {
+    //       title: 'Starred',
+    //       url: '#',
+    //     },
+    //     {
+    //       title: 'Settings',
+    //       url: '#',
+    //     },
+    //   ],
+    // },
     {
-      title: 'Playground',
-      url: '#',
-      icon: <TerminalSquareIcon />,
-      isActive: true,
-      items: [
-        {
-          title: 'History',
-          url: '#',
-        },
-        {
-          title: 'Starred',
-          url: '#',
-        },
-        {
-          title: 'Settings',
-          url: '#',
-        },
-      ],
+      title: 'Partners',
+      url: '/dashboard/partners',
+      icon: <GalleryVerticalEndIcon />,
     },
     {
       title: 'Terminales',
