@@ -6,6 +6,7 @@ import type {
   CashboxTerminalOperationResponse,
   CashboxTerminalOperationUpdate,
 } from '@/types/db/specification/cashboxTerminalOperation';
+import { formatTranPeriod } from '@/lib/date_utils';
 
 export type CashboxTerminalOperationFilters = {
   cashboxTerminalId?: string;
@@ -121,7 +122,9 @@ export async function updateCashboxTerminalOperation(
   }
 
   if (Object.keys(updates).length) {
-    updates.tran_date = new Date().toISOString();
+    const now = new Date();
+    updates.tran_date = now.toISOString();
+    updates.tran_period = formatTranPeriod(now);
   }
 
   if (!Object.keys(updates).length) {
@@ -143,9 +146,14 @@ export async function updateCashboxTerminalOperation(
 }
 
 export async function deactivateCashboxTerminalOperation(id: string) {
+  const updates: Record<string, unknown> = {};
+  updates.is_active = false;
+  const now = new Date();
+  updates.tran_date = now.toISOString();
+  updates.tran_period = formatTranPeriod(now);
   const [updated] = await db
     .update(cashbox_terminal_operationInSpecification)
-    .set({ is_active: false })
+    .set(updates)
     .where(
       eq(
         cashbox_terminal_operationInSpecification.cashbox_terminal_operation_id,

@@ -7,6 +7,7 @@ import type {
   CashboxRoleOperationQuery,
   CashboxRoleOperationUpdate,
 } from '@/types/db/specification/cashboxRoleOperation';
+import { formatTranPeriod } from '@/lib/date_utils';
 
 export const mapCashboxRoleOperation = (
   row: Record<string, unknown>,
@@ -102,7 +103,9 @@ export async function updateCashboxRoleOperation(
   if (payload.isActive !== undefined) updates.is_active = payload.isActive;
 
   if (Object.keys(updates).length) {
-    updates.tran_date = new Date().toISOString();
+    const now = new Date();
+    updates.tran_date = now.toISOString();
+    updates.tran_period = formatTranPeriod(now);
   }
 
   if (!Object.keys(updates).length) {
@@ -121,9 +124,14 @@ export async function updateCashboxRoleOperation(
 }
 
 export async function deactivateCashboxRoleOperation(id: string) {
+  const updates: Record<string, unknown> = {};
+  updates.is_active = false;
+  const now = new Date();
+  updates.tran_date = now.toISOString();
+  updates.tran_period = formatTranPeriod(now);
   const [updated] = await db
     .update(cashbox_role_operationInSpecification)
-    .set({ is_active: false })
+    .set(updates)
     .where(
       eq(cashbox_role_operationInSpecification.cashbox_role_operation_id, id),
     )

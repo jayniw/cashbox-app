@@ -6,6 +6,7 @@ import type {
   CashboxOperationResponse,
   CashboxOperationUpdate,
 } from '@/types/db/specification/cashboxOperation';
+import { formatTranPeriod } from '@/lib/date_utils';
 
 export type CashboxOperationFilters = {
   partnerId?: string;
@@ -114,12 +115,10 @@ export async function updateCashboxOperation(
     updates.tran_id = payload.tranId ?? null;
   }
 
-  if (payload.tranPeriod !== undefined) {
-    updates.tran_period = payload.tranPeriod;
-  }
-
   if (Object.keys(updates).length) {
-    updates.tran_date = new Date().toISOString();
+    const now = new Date();
+    updates.tran_date = now.toISOString();
+    updates.tran_period = formatTranPeriod(now);
   }
 
   if (!Object.keys(updates).length) {
@@ -136,9 +135,14 @@ export async function updateCashboxOperation(
 }
 
 export async function deactivateCashboxOperation(id: string) {
+  const updates: Record<string, unknown> = {};
+  updates.is_active = false;
+  const now = new Date();
+  updates.tran_date = now.toISOString();
+  updates.tran_period = formatTranPeriod(now);
   const [updated] = await db
     .update(cashbox_operationInSpecification)
-    .set({ is_active: false })
+    .set(updates)
     .where(eq(cashbox_operationInSpecification.cashbox_operation_id, id))
     .returning();
 

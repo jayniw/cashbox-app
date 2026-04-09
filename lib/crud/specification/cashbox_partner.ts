@@ -6,6 +6,7 @@ import type {
   CashboxPartnerResponse,
   CashboxPartnerUpdate,
 } from '@/types/db/specification/cashboxPartner';
+import { formatTranPeriod } from '@/lib/date_utils';
 
 export type CashboxPartnerFilters = {
   partnerName?: string;
@@ -98,7 +99,9 @@ export async function updateCashboxPartner(
     updates.tran_period = payload.tranPeriod;
 
   if (Object.keys(updates).length) {
-    updates.tran_date = new Date().toISOString();
+    const now = new Date();
+    updates.tran_date = now.toISOString();
+    updates.tran_period = formatTranPeriod(now);
   }
 
   if (!Object.keys(updates).length) {
@@ -115,9 +118,14 @@ export async function updateCashboxPartner(
 }
 
 export async function deactivateCashboxPartner(id: string) {
+  const updates: Record<string, unknown> = {};
+  updates.partner_status = 'Inactive';
+  const now = new Date();
+  updates.tran_date = now.toISOString();
+  updates.tran_period = formatTranPeriod(now);
   const [updated] = await db
     .update(cashbox_partnerInSpecification)
-    .set({ partner_status: 'Inactive' })
+    .set(updates)
     .where(eq(cashbox_partnerInSpecification.cashbox_partner_id, id))
     .returning();
 

@@ -19,6 +19,7 @@ import {
   TerminalIcon,
   TerminalSquareIcon,
   BotIcon,
+  UsersIcon,
   BookOpenIcon,
   Settings2Icon,
   FrameIcon,
@@ -82,57 +83,62 @@ const data = {
       icon: <TerminalIcon />,
     },
     {
+      title: 'Usuarios',
+      url: '/dashboard/users',
+      icon: <UsersIcon />,
+    },
+    {
       title: 'Roles',
       url: '/dashboard/roles',
       icon: <BotIcon />,
     },
     {
-      title: 'Models',
-      url: '#',
-      icon: <BotIcon />,
-      items: [
-        {
-          title: 'Genesis',
-          url: '#',
-        },
-        {
-          title: 'Explorer',
-          url: '#',
-        },
-        {
-          title: 'Quantum',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Backend',
+      title: 'API Documentación',
       url: '/docs',
       icon: <BookOpenIcon />,
     },
-    {
-      title: 'Settings',
-      url: '#',
-      icon: <Settings2Icon />,
-      items: [
-        {
-          title: 'General',
-          url: '#',
-        },
-        {
-          title: 'Team',
-          url: '#',
-        },
-        {
-          title: 'Billing',
-          url: '#',
-        },
-        {
-          title: 'Limits',
-          url: '#',
-        },
-      ],
-    },
+    // {
+    //   title: 'Models',
+    //   url: '#',
+    //   icon: <BotIcon />,
+    //   items: [
+    //     {
+    //       title: 'Genesis',
+    //       url: '#',
+    //     },
+    //     {
+    //       title: 'Explorer',
+    //       url: '#',
+    //     },
+    //     {
+    //       title: 'Quantum',
+    //       url: '#',
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: 'Settings',
+    //   url: '#',
+    //   icon: <Settings2Icon />,
+    //   items: [
+    //     {
+    //       title: 'General',
+    //       url: '#',
+    //     },
+    //     {
+    //       title: 'Team',
+    //       url: '#',
+    //     },
+    //     {
+    //       title: 'Billing',
+    //       url: '#',
+    //     },
+    //     {
+    //       title: 'Limits',
+    //       url: '#',
+    //     },
+    //   ],
+    // },
   ],
   projects: [
     {
@@ -164,7 +170,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

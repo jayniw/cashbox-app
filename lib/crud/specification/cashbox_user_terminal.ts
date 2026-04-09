@@ -123,9 +123,14 @@ export async function updateCashboxUserTerminal(
 }
 
 export async function deactivateCashboxUserTerminal(id: string) {
+  const updates: Record<string, unknown> = {};
+  updates.is_active = false;
+  const now = new Date();
+  updates.tran_date = now.toISOString();
+  updates.tran_period = formatTranPeriod(now);
   const [updated] = await db
     .update(cashbox_user_terminalInSpecification)
-    .set({ is_active: false })
+    .set(updates)
     .where(
       eq(cashbox_user_terminalInSpecification.cashbox_user_terminal_id, id),
     )

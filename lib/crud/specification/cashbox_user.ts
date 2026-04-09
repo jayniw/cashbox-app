@@ -6,6 +6,7 @@ import type {
   CashboxUserResponse,
   CashboxUserUpdate,
 } from '@/types/db/specification/cashboxUser';
+import { formatTranPeriod } from '@/lib/date_utils';
 
 export type CashboxUserFilters = {
   userName?: string;
@@ -105,7 +106,9 @@ export async function updateCashboxUser(
     updates.user_phone = payload.userPhone ?? null;
 
   if (Object.keys(updates).length) {
-    updates.tran_date = new Date().toISOString();
+    const now = new Date();
+    updates.tran_date = now.toISOString();
+    updates.tran_period = formatTranPeriod(now);
   }
 
   if (!Object.keys(updates).length) {
@@ -122,9 +125,14 @@ export async function updateCashboxUser(
 }
 
 export async function deactivateCashboxUser(id: string) {
+  const updates: Record<string, unknown> = {};
+  updates.user_status = 'Inactive';
+  const now = new Date();
+  updates.tran_date = now.toISOString();
+  updates.tran_period = formatTranPeriod(now);
   const [updated] = await db
     .update(cashbox_userInSpecification)
-    .set({ user_status: 'Inactive' })
+    .set(updates)
     .where(eq(cashbox_userInSpecification.cashbox_user_id, id))
     .returning();
 

@@ -6,6 +6,7 @@ import type {
   CashboxTerminalPaymentMethodResponse,
   CashboxTerminalPaymentMethodUpdate,
 } from '@/types/db/specification/cashboxTerminalPaymentMethod';
+import { formatTranPeriod } from '@/lib/date_utils';
 
 export type CashboxTerminalPaymentMethodFilters = {
   cashboxTerminalId?: string;
@@ -122,7 +123,9 @@ export async function updateCashboxTerminalPaymentMethod(
   }
 
   if (Object.keys(updates).length) {
-    updates.tran_date = new Date().toISOString();
+    const now = new Date();
+    updates.tran_date = now.toISOString();
+    updates.tran_period = formatTranPeriod(now);
   }
 
   if (!Object.keys(updates).length) {

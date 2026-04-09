@@ -133,9 +133,14 @@ export async function updateCashboxPartnerPaymentMethod(
 }
 
 export async function deactivateCashboxPartnerPaymentMethod(id: string) {
+  const updates: Record<string, unknown> = {};
+  updates.is_active = false;
+  const now = new Date();
+  updates.tran_date = now.toISOString();
+  updates.tran_period = formatTranPeriod(now);
   const [updated] = await db
     .update(cashbox_partner_payment_methodInSpecification)
-    .set({ is_active: false })
+    .set(updates)
     .where(
       eq(
         cashbox_partner_payment_methodInSpecification.cashbox_partner_payment_method_id,
