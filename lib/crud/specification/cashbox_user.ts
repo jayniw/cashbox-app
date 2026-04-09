@@ -105,6 +105,10 @@ export async function updateCashboxUser(
     updates.user_phone = payload.userPhone ?? null;
   if (payload.userId !== undefined) updates.user_id = payload.userId;
 
+  if (Object.keys(updates).length) {
+    updates.tran_date = new Date().toISOString();
+  }
+
   if (!Object.keys(updates).length) {
     return null;
   }

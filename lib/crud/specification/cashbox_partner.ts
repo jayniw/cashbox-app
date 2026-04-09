@@ -98,6 +98,10 @@ export async function updateCashboxPartner(
     updates.tran_period = payload.tranPeriod;
   if (payload.userId !== undefined) updates.user_id = payload.userId;
 
+  if (Object.keys(updates).length) {
+    updates.tran_date = new Date().toISOString();
+  }
+
   if (!Object.keys(updates).length) {
     return null;
   }

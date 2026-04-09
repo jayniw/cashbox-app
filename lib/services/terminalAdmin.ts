@@ -1,3 +1,5 @@
+import { fetchJson } from './api';
+
 export type TerminalResponse = {
   cashboxTerminalId: string;
   terminalName: string | null;
@@ -21,40 +23,12 @@ export type TerminalCreatePayload = {
 
 export type TerminalUpdatePayload = TerminalCreatePayload;
 
-export type SelectOption = {
-  id: string;
-  label: string;
-};
-
 export type TerminalRelations = {
   partnerIds: string[];
   operationIds: string[];
   paymentMethodIds: string[];
 };
-
-const fetchJson = async <T>(
-  input: RequestInfo,
-  init?: RequestInit,
-): Promise<T> => {
-  const response = await fetch(input, {
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      ...(init?.headers ?? {}),
-    },
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(
-      `Request failed: ${response.status} ${response.statusText} - ${text}`,
-    );
-  }
-
-  return response.json();
-};
-
+/* TERMINAL */
 export async function listTerminals() {
   return fetchJson<TerminalResponse[]>('/api/specification/cashbox_terminal');
 }
@@ -85,43 +59,12 @@ export async function deactivateTerminal(id: string) {
   });
 }
 
-export async function listPartners() {
-  return fetchJson<SelectOption[]>('/api/specification/cashbox_partner').then(
-    (items) =>
-      items.map((item: any) => ({
-        id: item.cashbox_partner_id,
-        label: item.partner_name ?? item.cashbox_partner_id,
-      })),
-  );
-}
-
-export async function listOperations() {
-  return fetchJson<SelectOption[]>('/api/specification/cashbox_operation').then(
-    (items) =>
-      items.map((item: any) => ({
-        id: item.cashbox_operation_id,
-        label: item.cashbox_operation_name ?? item.cashbox_operation_id,
-      })),
-  );
-}
-
-export async function listPaymentMethods() {
-  return fetchJson<SelectOption[]>(
-    '/api/specification/cashbox_payment_method',
-  ).then((items) =>
-    items.map((item: any) => ({
-      id: item.cashbox_payment_method_id,
-      label: item.payment_method_name ?? item.cashbox_payment_method_id,
-    })),
-  );
-}
-
 async function fetchRelationRecords(
   url: string,
 ): Promise<Array<Record<string, unknown>>> {
   return fetchJson<Array<Record<string, unknown>>>(url);
 }
-
+/* TERMINAL RELATIONS */
 export async function listTerminalPartners(terminalId: string) {
   const data = await fetchRelationRecords(
     `/api/specification/cashbox_terminal_partner?cashboxTerminalId=${encodeURIComponent(
@@ -130,9 +73,18 @@ export async function listTerminalPartners(terminalId: string) {
   );
 
   return data.map((item) => ({
-    id: item.cashbox_terminal_partner_id as string,
-    relatedId: item.cashbox_partner_id as string,
-    isActive: Boolean(item.is_active),
+    id:
+      (item.cashbox_terminal_partner_id as string | undefined) ??
+      (item.cashboxTerminalPartnerId as string | undefined) ??
+      '',
+    relatedId:
+      (item.cashbox_partner_id as string | undefined) ??
+      (item.cashboxPartnerId as string | undefined) ??
+      '',
+    isActive:
+      (item.is_active as boolean | undefined) ??
+      (item.isActive as boolean | undefined) ??
+      false,
   }));
 }
 
@@ -144,9 +96,18 @@ export async function listTerminalOperations(terminalId: string) {
   );
 
   return data.map((item) => ({
-    id: item.cashbox_terminal_operation_id as string,
-    relatedId: item.cashbox_operation_id as string,
-    isActive: Boolean(item.is_active),
+    id:
+      (item.cashbox_terminal_operation_id as string | undefined) ??
+      (item.cashboxTerminalOperationId as string | undefined) ??
+      '',
+    relatedId:
+      (item.cashbox_operation_id as string | undefined) ??
+      (item.cashboxOperationId as string | undefined) ??
+      '',
+    isActive:
+      (item.is_active as boolean | undefined) ??
+      (item.isActive as boolean | undefined) ??
+      false,
   }));
 }
 
@@ -158,9 +119,18 @@ export async function listTerminalPaymentMethods(terminalId: string) {
   );
 
   return data.map((item) => ({
-    id: item.cashbox_terminal_payment_method_id as string,
-    relatedId: item.cashbox_payment_method_id as string,
-    isActive: Boolean(item.is_active),
+    id:
+      (item.cashbox_terminal_payment_method_id as string | undefined) ??
+      (item.cashboxTerminalPaymentMethodId as string | undefined) ??
+      '',
+    relatedId:
+      (item.cashbox_payment_method_id as string | undefined) ??
+      (item.cashboxPaymentMethodId as string | undefined) ??
+      '',
+    isActive:
+      (item.is_active as boolean | undefined) ??
+      (item.isActive as boolean | undefined) ??
+      false,
   }));
 }
 

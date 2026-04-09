@@ -1,140 +1,78 @@
 'use client';
 
-import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { TerminalForm } from './terminal-form';
-import { TerminalTable } from './terminal-table';
+import { AdminConfirmDialog } from '@/components/admin-confirm-dialog';
+import { AdminFormSheet } from '@/components/admin-form-sheet';
 import {
   createTerminalWithRelations,
   deactivateTerminal,
-  getTerminalRelations,
-  listOperations,
-  listPartners,
-  listPaymentMethods,
-  listTerminals,
+  updateTerminal,
   updateTerminalWithRelations,
-  type SelectOption,
-  type TerminalResponse,
   type TerminalCreatePayload,
+  type TerminalResponse,
 } from '@/lib/services/terminalAdmin';
+import * as React from 'react';
+import { TerminalForm } from './terminal-form';
+import { TerminalTable } from './terminal-table';
+import { AdminListPage } from '@/components/admin-list-page';
+import { useAdminStore } from '@/lib/store/adminStore';
 
 export function TerminalAdminPage() {
-  const [terminals, setTerminals] = React.useState<TerminalResponse[]>([]);
-  const [partnerOptions, setPartnerOptions] = React.useState<SelectOption[]>(
-    [],
-  );
-  const [operationOptions, setOperationOptions] = React.useState<
-    SelectOption[]
-  >([]);
-  const [paymentMethodOptions, setPaymentMethodOptions] = React.useState<
-    SelectOption[]
-  >([]);
-  const [isLoading, setIsLoading] = React.useState(true);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [confirmTerminal, setConfirmTerminal] = React.useState<{
+    id: string;
+    name: string | null;
+    action: 'activate' | 'deactivate';
+  } | null>(null);
   const [editingTerminal, setEditingTerminal] =
     React.useState<TerminalResponse | null>(null);
-  const [defaultPartnerIds, setDefaultPartnerIds] = React.useState<string[]>(
-    [],
-  );
-  const [defaultOperationIds, setDefaultOperationIds] = React.useState<
-    string[]
-  >([]);
-  const [defaultPaymentMethodIds, setDefaultPaymentMethodIds] = React.useState<
-    string[]
-  >([]);
-  const [error, setError] = React.useState<string | null>(null);
-
-  const loadOptions = React.useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [
-        terminalResult,
-        partnerResult,
-        operationResult,
-        paymentMethodResult,
-      ] = await Promise.all([
-        listTerminals(),
-        listPartners(),
-        listOperations(),
-        listPaymentMethods(),
-      ]);
-
-      setTerminals(terminalResult);
-      setPartnerOptions(partnerResult);
-      setOperationOptions(operationResult);
-      setPaymentMethodOptions(paymentMethodResult);
-      setError(null);
-    } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : 'Error al cargar los datos de terminales.',
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    loadOptions();
-  }, [loadOptions]);
+  const refreshKey = useAdminStore((state) => state.refreshKey);
+  const error = useAdminStore((state) => state.error);
+  const setError = useAdminStore((state) => state.setError);
+  const bumpRefreshKey = useAdminStore((state) => state.bumpRefreshKey);
 
   const handleCreate = () => {
     setEditingTerminal(null);
-    setDefaultPartnerIds([]);
-    setDefaultOperationIds([]);
-    setDefaultPaymentMethodIds([]);
     setIsSheetOpen(true);
   };
 
   const handleEdit = async (terminal: TerminalResponse) => {
-    setIsLoading(true);
-    try {
-      const relations = await getTerminalRelations(terminal.cashboxTerminalId);
-      setEditingTerminal(terminal);
-      setDefaultPartnerIds(relations.partnerIds);
-      setDefaultOperationIds(relations.operationIds);
-      setDefaultPaymentMethodIds(relations.paymentMethodIds);
-      setIsSheetOpen(true);
-    } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : 'No se pudo cargar la información del terminal.',
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    setEditingTerminal(terminal);
+    setIsSheetOpen(true);
   };
 
-  const handleDeactivate = async (terminalId: string) => {
-    const confirmed = window.confirm(
-      '¿Deseas inactivar este terminal? Esta acción no eliminará los datos.',
-    );
-    if (!confirmed) {
-      return;
-    }
+  const handleRequestAction = (
+    terminal: TerminalResponse,
+    action: 'activate' | 'deactivate',
+  ) => {
+    setConfirmTerminal({
+      id: terminal.cashboxTerminalId,
+      name: terminal.terminalName,
+      action,
+    });
+    setConfirmOpen(true);
+  };
 
+  const handleConfirmAction = async () => {
+    if (!confirmTerminal) return;
+
+    setConfirmOpen(false);
     try {
-      setIsLoading(true);
-      await deactivateTerminal(terminalId);
-      await loadOptions();
+      if (confirmTerminal.action === 'activate') {
+        await updateTerminal(confirmTerminal.id, { isActive: true });
+      } else {
+        await deactivateTerminal(confirmTerminal.id);
+      }
+      bumpRefreshKey();
     } catch (cause) {
       setError(
         cause instanceof Error
           ? cause.message
-          : 'Error al inactivar el terminal.',
+          : `Error al ${confirmTerminal.action} el terminal.`,
       );
     } finally {
-      setIsLoading(false);
+      setConfirmTerminal(null);
     }
   };
 
@@ -165,7 +103,7 @@ export function TerminalAdminPage() {
 
       setIsSheetOpen(false);
       setEditingTerminal(null);
-      await loadOptions();
+      bumpRefreshKey();
     } catch (cause) {
       setError(
         cause instanceof Error
@@ -184,61 +122,71 @@ export function TerminalAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-xl bg-muted p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">
-            Administración de terminales
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Lista, crea y edita terminales. Asigna partners, operaciones y
-            medios de pago.
-          </p>
-        </div>
-        <Button onClick={handleCreate}>Nuevo terminal</Button>
-      </div>
+      <AdminListPage
+        title="Administración de terminales"
+        description="Lista, crea y edita terminales. Asigna partners, operaciones y medios de pago."
+        onCreate={handleCreate}
+        createAriaLabel="Crear nueva terminal"
+        error={error}
+      >
+        <TerminalTable
+          onEdit={handleEdit}
+          onRequestDeactivate={(terminal) => {
+            handleRequestAction(terminal, 'deactivate');
+          }}
+          onRequestActivate={(terminal) => {
+            handleRequestAction(terminal, 'activate');
+          }}
+          refreshKey={refreshKey}
+        />
+      </AdminListPage>
 
-      {error ? (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
-        </div>
-      ) : null}
-
-      <TerminalTable
-        terminals={terminals}
-        onEdit={handleEdit}
-        onDeactivate={handleDeactivate}
-        isLoading={isLoading}
+      <AdminConfirmDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          setConfirmOpen(open);
+          if (!open) {
+            setConfirmTerminal(null);
+          }
+        }}
+        title={
+          confirmTerminal?.action === 'activate'
+            ? 'Activar terminal'
+            : 'Inactivar terminal'
+        }
+        description={
+          confirmTerminal?.action === 'activate'
+            ? `¿Deseas activar el terminal ${confirmTerminal?.name ?? 'sin nombre'}? Esta acción lo pondrá nuevamente en servicio.`
+            : `¿Deseas inactivar el terminal ${confirmTerminal?.name ?? 'sin nombre'}? Esta acción lo desactivará pero no eliminará los datos.`
+        }
+        confirmLabel={
+          confirmTerminal?.action === 'activate' ? 'Activar' : 'Inactivar'
+        }
+        confirmVariant={
+          confirmTerminal?.action === 'activate' ? 'default' : 'destructive'
+        }
+        onConfirm={handleConfirmAction}
       />
 
-      <Sheet
+      <AdminFormSheet
         open={isSheetOpen}
         onOpenChange={setIsSheetOpen}
+        title={editingTerminal ? 'Editar terminal' : 'Crear terminal'}
+        description={
+          editingTerminal
+            ? 'Actualiza la configuración del terminal y sus relaciones.'
+            : 'Completa los datos del terminal y asigna partners, operaciones y métodos de pago.'
+        }
+        side="right"
+        className="max-w-2xl"
       >
-        <SheetContent
-          side="right"
-          className="max-w-2xl"
-        >
-          <SheetHeader>
-            <SheetTitle>
-              {editingTerminal ? 'Editar terminal' : 'Crear terminal'}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
-            <TerminalForm
-              terminal={editingTerminal}
-              partnerOptions={partnerOptions}
-              operationOptions={operationOptions}
-              paymentMethodOptions={paymentMethodOptions}
-              defaultPartnerIds={defaultPartnerIds}
-              defaultOperationIds={defaultOperationIds}
-              defaultPaymentMethodIds={defaultPaymentMethodIds}
-              onSubmit={handleSubmit}
-              onCancel={handleCloseSheet}
-              isSaving={isSaving}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+        <TerminalForm
+          terminal={editingTerminal}
+          onSubmit={handleSubmit}
+          onCancel={handleCloseSheet}
+          isSaving={isSaving}
+        />
+      </AdminFormSheet>
     </div>
   );
 }

@@ -13,6 +13,8 @@ import { cashboxTerminalOperationOpenApi } from '@/app/api/specification/cashbox
 import { cashboxTerminalOperationByIdOpenApi } from '@/app/api/specification/cashbox_terminal_operation/[id]/route';
 import { cashboxTerminalPaymentMethodOpenApi } from '@/app/api/specification/cashbox_terminal_payment_method/route';
 import { cashboxTerminalPaymentMethodByIdOpenApi } from '@/app/api/specification/cashbox_terminal_payment_method/[id]/route';
+import { cashboxOperationOpenApi } from '@/app/api/specification/cashbox_operation/route';
+import { cashboxOperationByIdOpenApi } from '@/app/api/specification/cashbox_operation/[id]/route';
 import { cashboxUserOpenApi } from '@/app/api/specification/cashbox_user/route';
 import { cashboxUserByIdOpenApi } from '@/app/api/specification/cashbox_user/[id]/route';
 
@@ -298,6 +300,8 @@ const routes: OpenApiRoute[] = [
   cashboxTerminalOperationByIdOpenApi,
   cashboxTerminalPaymentMethodOpenApi,
   cashboxTerminalPaymentMethodByIdOpenApi,
+  cashboxOperationOpenApi,
+  cashboxOperationByIdOpenApi,
   cashboxUserOpenApi,
   cashboxUserByIdOpenApi,
 ];

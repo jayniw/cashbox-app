@@ -1,6 +1,7 @@
 ---
 name: crud-generator
-description: Generate a full Next.js App Router CRUD API for a specified database table using the cashbox_partner implementation style, including Zod validation, camelCase JSON mapping, and OpenAPI metadata.
+description: Generate a reusable Next.js App Router CRUD API scaffold for a specified database table. It should work in any Next.js App Router project and requires Zod and Drizzle ORM.
+compatibility: Next.js App Router, Zod, Drizzle ORM
 ---
 
 # CRUD Generator Skill
@@ -35,13 +36,18 @@ Para una tabla `foo_bar` debe generar al menos:
 - `app/api/<schema>/foo_bar/route.ts`
 - `app/api/<schema>/foo_bar/[id]/route.ts`
 
-Y opcionalmente:
+Si el proyecto ya usa una estructura distinta, adapta los nombres y rutas a esa convención.
+
+Además, el código generado debe incluir:
 
 - metadatos exportados para `lib/openapi.ts`
 - validación de query params
 - respuesta 404 bien manejada
 - response 201 para creación
 - response 204 para eliminación silenciosa
+- si existe `tran_date`/`tran_period`, actualizarlos en los métodos `PATCH`/`update` y `DELETE`/`deactivate` con:
+  - `tran_date` en ISO
+  - `tran_period` en formato `yyyymm`
 
 ## Guía paso a paso
 

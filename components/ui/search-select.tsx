@@ -46,7 +46,7 @@ export function SearchSelect({
 
     const lowerQuery = query.toLowerCase();
     return options.filter((option) =>
-      option.label.toLowerCase().includes(lowerQuery),
+      (option.label ?? '').toLowerCase().includes(lowerQuery),
     );
   }, [options, query]);
 
@@ -97,9 +97,9 @@ export function SearchSelect({
         <div className="flex flex-wrap gap-2">
           {selectedOptions.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {selectedOptions.map((option) => (
+              {selectedOptions.map((option, index) => (
                 <div
-                  key={option.id}
+                  key={`${option.id}-${index}`}
                   className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/70 px-2 py-1 text-xs text-foreground"
                 >
                   <span>{option.label}</span>
@@ -140,25 +140,25 @@ export function SearchSelect({
         <p className="mt-2 text-xs text-muted-foreground">{description}</p>
       ) : null}
       {open ? (
-        <div className="absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-lg border border-border bg-popover shadow-xl">
           <div className="max-h-72 overflow-y-auto">
             {filteredOptions.length === 0 ? (
               <div className="p-3 text-sm text-muted-foreground">
                 No se encontraron opciones
               </div>
             ) : (
-              filteredOptions.map((option) => {
+              filteredOptions.map((option, index) => {
                 const selected = selectedValues.includes(option.id);
                 return (
                   <button
-                    key={option.id}
+                    key={`${option.id}-${index}`}
                     type="button"
                     onClick={(event) => {
                       event.preventDefault();
                       toggleValue(option.id);
                     }}
                     className={cn(
-                      'flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition hover:bg-accent/80 hover:text-accent-foreground',
+                      'flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-foreground transition hover:bg-accent/80 hover:text-accent-foreground',
                       selected && 'bg-accent/90 text-accent-foreground',
                     )}
                   >

@@ -124,6 +124,10 @@ export async function updateCashboxTerminalOperation(
     updates.user_id = payload.userId;
   }
 
+  if (Object.keys(updates).length) {
+    updates.tran_date = new Date().toISOString();
+  }
+
   if (!Object.keys(updates).length) {
     return null;
   }

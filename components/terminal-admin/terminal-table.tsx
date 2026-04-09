@@ -1,20 +1,60 @@
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import type { TerminalResponse } from '@/lib/services/terminalAdmin';
+import { CheckIcon, PencilIcon, XIcon } from 'lucide-react';
+import {
+  listTerminals,
+  type TerminalResponse,
+} from '@/lib/services/terminalAdmin';
 
 interface TerminalTableProps {
-  terminals: TerminalResponse[];
   onEdit: (terminal: TerminalResponse) => void;
-  onDeactivate: (terminalId: string) => void;
-  isLoading: boolean;
+  onRequestDeactivate: (terminal: TerminalResponse) => void;
+  onRequestActivate: (terminal: TerminalResponse) => void;
+  refreshKey?: number;
 }
 
 export function TerminalTable({
-  terminals,
   onEdit,
-  onDeactivate,
-  isLoading,
+  onRequestDeactivate,
+  onRequestActivate,
+  refreshKey,
 }: TerminalTableProps) {
+  const [terminals, setTerminals] = React.useState<TerminalResponse[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const loadTerminals = React.useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      const terminalResult = await listTerminals();
+      setTerminals(terminalResult);
+      setError(null);
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Error al cargar los terminales.',
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    loadTerminals();
+  }, [loadTerminals, refreshKey]);
+
+  const handleDeactivate = (terminal: TerminalResponse) => {
+    onRequestDeactivate(terminal);
+  };
+
+  const handleActivate = (terminal: TerminalResponse) => {
+    onRequestActivate(terminal);
+  };
+
+  const isBusy = isLoading;
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-background shadow-sm">
       <table className="min-w-full border-collapse text-left text-sm">
@@ -28,13 +68,22 @@ export function TerminalTable({
           </tr>
         </thead>
         <tbody>
-          {isLoading ? (
+          {isBusy ? (
             <tr>
               <td
                 colSpan={5}
                 className="px-4 py-8 text-center text-sm text-muted-foreground"
               >
                 Cargando terminales...
+              </td>
+            </tr>
+          ) : error ? (
+            <tr>
+              <td
+                colSpan={5}
+                className="px-4 py-8 text-center text-sm text-destructive"
+              >
+                {error}
               </td>
             </tr>
           ) : terminals.length === 0 ? (
@@ -61,15 +110,25 @@ export function TerminalTable({
                   {terminal.ipAddress ?? '—'}
                 </td>
                 <td className="px-4 py-4">
-                  <span
-                    className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                  <div
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${
                       terminal.isActive
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                        ? 'border-green-200 bg-green-50 text-green-700'
+                        : 'border-red-200 bg-red-50 text-red-700'
                     }`}
                   >
-                    {terminal.isActive ? 'Activo' : 'Inactivo'}
-                  </span>
+                    {terminal.isActive ? (
+                      <CheckIcon
+                        className="size-4"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <XIcon
+                        className="size-4"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
                 </td>
                 <td className="px-4 py-4 text-muted-foreground">
                   {new Date(terminal.tranDate).toLocaleDateString('es-ES', {
@@ -82,18 +141,31 @@ export function TerminalTable({
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
                       onClick={() => onEdit(terminal)}
+                      aria-label="Editar terminal"
                     >
-                      Editar
+                      <PencilIcon className="size-4" />
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => onDeactivate(terminal.cashboxTerminalId)}
-                    >
-                      Inactivar
-                    </Button>
+                    {terminal.isActive ? (
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => handleDeactivate(terminal)}
+                        aria-label="Inactivar terminal"
+                      >
+                        <XIcon className="size-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="default"
+                        size="icon"
+                        onClick={() => handleActivate(terminal)}
+                        aria-label="Activar terminal"
+                      >
+                        <CheckIcon className="size-4" />
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>

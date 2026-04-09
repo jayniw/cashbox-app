@@ -96,27 +96,9 @@ const data = {
       ],
     },
     {
-      title: 'Documentation',
-      url: '#',
+      title: 'Backend',
+      url: '/docs',
       icon: <BookOpenIcon />,
-      items: [
-        {
-          title: 'Introduction',
-          url: '#',
-        },
-        {
-          title: 'Get Started',
-          url: '#',
-        },
-        {
-          title: 'Tutorials',
-          url: '#',
-        },
-        {
-          title: 'Changelog',
-          url: '#',
-        },
-      ],
     },
     {
       title: 'Settings',

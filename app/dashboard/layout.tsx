@@ -30,7 +30,7 @@ export default function DashboardLayout({
             <ModeToggle />
           </div>
         </header>
-        <div className="flex-1 min-w-0 overflow-auto p-4 pt-0 w-full">
+        <div className="flex-1 min-w-0 overflow-auto p-4 pt-2 w-full">
           {children}
         </div>
       </SidebarInset>

@@ -78,7 +78,14 @@ function parseGeoPoint(value: string | null | undefined) {
   return sql`point(${x}, ${y})`;
 }
 
+function formatTranPeriod(date = new Date()) {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  return `${year}${month}`;
+}
+
 export async function createCashboxTerminal(payload: CashboxTerminalCreate) {
+  const now = new Date();
   const [created] = await db
     .insert(cashbox_terminalInSpecification)
     .values({
@@ -88,6 +95,8 @@ export async function createCashboxTerminal(payload: CashboxTerminalCreate) {
       geo_url: payload.geoUrl ?? null,
       is_active: payload.isActive ?? true,
       user_id: payload.userId ?? null,
+      tran_date: now.toISOString(),
+      tran_period: formatTranPeriod(now),
     })
     .returning();
 
@@ -120,6 +129,12 @@ export async function updateCashboxTerminal(
   if (payload.isActive !== undefined) updates.is_active = payload.isActive;
   if (payload.userId !== undefined) updates.user_id = payload.userId;
 
+  if (Object.keys(updates).length) {
+    const now = new Date();
+    updates.tran_date = now.toISOString();
+    updates.tran_period = formatTranPeriod(now);
+  }
+
   if (!Object.keys(updates).length) {
     return null;
   }
@@ -134,9 +149,14 @@ export async function updateCashboxTerminal(
 }
 
 export async function deactivateCashboxTerminal(id: string) {
+  const now = new Date();
   const [updated] = await db
     .update(cashbox_terminalInSpecification)
-    .set({ is_active: false })
+    .set({
+      is_active: false,
+      tran_date: now.toISOString(),
+      tran_period: formatTranPeriod(now),
+    })
     .where(eq(cashbox_terminalInSpecification.cashbox_terminal_id, id))
     .returning();
 
