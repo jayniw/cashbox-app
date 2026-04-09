@@ -3,7 +3,6 @@
 import * as React from 'react';
 
 import { NavMain } from '@/components/nav-main';
-import { NavProjects } from '@/components/nav-projects';
 import { NavUser } from '@/components/nav-user';
 import { TeamSwitcher } from '@/components/team-switcher';
 import {
@@ -21,7 +20,6 @@ import {
   BotIcon,
   UsersIcon,
   BookOpenIcon,
-  Settings2Icon,
   FrameIcon,
   PieChartIcon,
   MapIcon,
@@ -81,6 +79,11 @@ const data = {
       title: 'Terminales',
       url: '/dashboard/terminals',
       icon: <TerminalIcon />,
+    },
+    {
+      title: 'Operaciones',
+      url: '/dashboard/operations',
+      icon: <TerminalSquareIcon />,
     },
     {
       title: 'Usuarios',

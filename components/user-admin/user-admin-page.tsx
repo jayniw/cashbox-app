@@ -4,7 +4,6 @@ import { AdminConfirmDialog } from '@/components/admin-confirm-dialog';
 import { AdminFormSheet } from '@/components/admin-form-sheet';
 import { AdminListPage } from '@/components/admin-list-page';
 import { UserForm } from './user-form';
-import { UserTable } from './user-table';
 import {
   createUserWithRelations,
   deactivateUser,
@@ -14,6 +13,7 @@ import {
 } from '@/lib/services/userAdmin';
 import { useAdminStore } from '@/lib/store/adminStore';
 import * as React from 'react';
+import { UserTable } from './user-table';
 
 export function UserAdminPage() {
   const [isSaving, setIsSaving] = React.useState(false);

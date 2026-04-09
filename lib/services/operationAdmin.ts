@@ -1,4 +1,10 @@
 import { fetchJson, type SelectOption } from './api';
+import type {
+  CashboxOperationResponse,
+  CashboxOperationCreate,
+  CashboxOperationUpdate,
+} from '@/types/db/specification/cashboxOperation';
+export type { CashboxOperationResponse } from '@/types/db/specification/cashboxOperation';
 
 export type OperationGroup = {
   partnerId: string;
@@ -49,4 +55,39 @@ export async function listOperationsByPartner(
     partnerLabel: partnerLabels[partnerId] ?? partnerId,
     operations: items.map(normalizeOperationItem).filter((option) => option.id),
   }));
+}
+
+export async function listOperations() {
+  return fetchJson<CashboxOperationResponse[]>(
+    '/api/specification/cashbox_operation',
+  );
+}
+
+export async function createOperation(payload: CashboxOperationCreate) {
+  return fetchJson<CashboxOperationResponse>(
+    '/api/specification/cashbox_operation',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export async function updateOperation(
+  id: string,
+  payload: CashboxOperationUpdate,
+) {
+  return fetchJson<CashboxOperationResponse>(
+    `/api/specification/cashbox_operation/${id}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export async function deactivateOperation(id: string) {
+  return fetchJson<null>(`/api/specification/cashbox_operation/${id}`, {
+    method: 'DELETE',
+  });
 }
