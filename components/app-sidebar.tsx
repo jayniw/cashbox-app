@@ -77,6 +77,11 @@ const data = {
       icon: <TerminalIcon />,
     },
     {
+      title: 'Roles',
+      url: '/dashboard/roles',
+      icon: <BotIcon />,
+    },
+    {
       title: 'Models',
       url: '#',
       icon: <BotIcon />,

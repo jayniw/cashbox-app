@@ -81,7 +81,7 @@ export async function createCashboxTerminalPartner(
       cashbox_terminal_id: payload.cashboxTerminalId,
       cashbox_partner_id: payload.cashboxPartnerId,
       is_active: payload.isActive ?? true,
-      user_id: payload.userId ?? null,
+      ...(payload.userId !== undefined ? { user_id: payload.userId } : {}),
     })
     .returning();
 
@@ -118,10 +118,6 @@ export async function updateCashboxTerminalPartner(
 
   if (payload.isActive !== undefined) {
     updates.is_active = payload.isActive;
-  }
-
-  if (payload.userId !== undefined) {
-    updates.user_id = payload.userId;
   }
 
   if (Object.keys(updates).length) {

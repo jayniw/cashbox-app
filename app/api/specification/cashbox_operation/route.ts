@@ -4,6 +4,7 @@ import {
   listCashboxOperations,
 } from '@/lib/crud/specification/cashbox_operation';
 import { parseJsonRequestBody } from '@/lib/api/parseJsonRequest';
+import { getRequestUserId } from '@/lib/api/audit';
 import {
   cashboxOperationCreateSchema,
   cashboxOperationQuerySchema,
@@ -37,8 +38,9 @@ export async function POST(request: Request) {
     cashboxOperationCreateSchema,
   );
   if (parsed.errorResponse) return parsed.errorResponse;
+  const requestUserId = getRequestUserId(request);
 
-  const created = await createCashboxOperation(parsed.value);
+  const created = await createCashboxOperation({ ...parsed.value, userId: requestUserId });
   return NextResponse.json(created, { status: 201 });
 }
 

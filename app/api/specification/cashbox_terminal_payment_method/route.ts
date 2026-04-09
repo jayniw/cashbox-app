@@ -4,6 +4,7 @@ import {
   listCashboxTerminalPaymentMethods,
 } from '@/lib/crud/specification/cashbox_terminal_payment_method';
 import { parseJsonRequestBody } from '@/lib/api/parseJsonRequest';
+import { getRequestUserId } from '@/lib/api/audit';
 import {
   cashboxTerminalPaymentMethodCreateSchema,
   cashboxTerminalPaymentMethodQuerySchema,
@@ -37,8 +38,9 @@ export async function POST(request: Request) {
     cashboxTerminalPaymentMethodCreateSchema,
   );
   if (parsed.errorResponse) return parsed.errorResponse;
+  const requestUserId = getRequestUserId(request);
 
-  const created = await createCashboxTerminalPaymentMethod(parsed.value);
+  const created = await createCashboxTerminalPaymentMethod({ ...parsed.value, userId: requestUserId });
   return NextResponse.json(created, { status: 201 });
 }
 

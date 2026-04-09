@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { parseJsonRequestBody } from '@/lib/api/parseJsonRequest';
 import {
-  deactivateCashboxRole,
   getCashboxRoleById,
   updateCashboxRole,
 } from '@/lib/crud/specification/cashbox_role';
 import {
   cashboxRoleResponseSchema,
   cashboxRoleUpdateSchema,
+  type CashboxRoleUpdate,
 } from '@/types/db/specification/cashboxRole';
 
 type Params = { params: Promise<{ id: string }> };
@@ -26,10 +25,14 @@ export async function GET(_request: Request, context: Params) {
 
 export async function PATCH(request: Request, context: Params) {
   const { id } = await context.params;
-  const parsed = await parseJsonRequestBody(request, cashboxRoleUpdateSchema);
+  const parsed = await parseJsonRequestBody<CashboxRoleUpdate>(
+    request,
+    cashboxRoleUpdateSchema,
+  );
   if (parsed.errorResponse) return parsed.errorResponse;
+  const { userId, ...updatePayload } = parsed.value;
 
-  const updated = await updateCashboxRole(id, parsed.value);
+  const updated = await updateCashboxRole(id, updatePayload);
 
   if (updated === null) {
     return NextResponse.json(
@@ -70,27 +73,5 @@ export const cashboxRoleByIdOpenApi = {
       responseSchema: cashboxRoleResponseSchema,
       responseSchemaName: 'CashboxRole',
     },
-    delete: {
-      summary: 'Soft delete a cashbox role',
-      responses: {
-        '204': { description: 'Cashbox role deactivated' },
-        '404': {
-          description: 'Cashbox role not found',
-          schema: z.object({ error: z.string() }),
-          schemaName: 'ErrorResponse',
-        },
-      },
-    },
   },
 };
-
-export async function DELETE(_request: Request, context: Params) {
-  const { id } = await context.params;
-  const result = await deactivateCashboxRole(id);
-
-  if (!result) {
-    return NextResponse.json({ error: 'Role not found' }, { status: 404 });
-  }
-
-  return new NextResponse(null, { status: 204 });
-}

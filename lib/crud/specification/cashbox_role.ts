@@ -1,6 +1,7 @@
 import { sql, and, type SQL, eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { cashbox_roleInSpecification } from '@/lib/schema/schema';
+import { formatTranPeriod } from '@/lib/date_utils';
 import type {
   CashboxRoleCreate,
   CashboxRoleResponse,
@@ -45,7 +46,7 @@ export async function listCashboxRoles(filters: CashboxRoleFilters) {
 export async function createCashboxRole(payload: CashboxRoleCreate) {
   const roleData = {
     role_name: payload.roleName ?? null,
-    user_id: payload.userId ?? null,
+    ...(payload.userId !== undefined ? { user_id: payload.userId } : {}),
   };
 
   const [created] = await db
@@ -72,10 +73,11 @@ export async function updateCashboxRole(
   const updates: Record<string, unknown> = {};
 
   if (payload.roleName !== undefined) updates.role_name = payload.roleName;
-  if (payload.userId !== undefined) updates.user_id = payload.userId;
 
   if (Object.keys(updates).length) {
-    updates.tran_date = new Date().toISOString();
+    const now = new Date();
+    updates.tran_date = now.toISOString();
+    updates.tran_period = formatTranPeriod(now);
   }
 
   if (!Object.keys(updates).length) {
@@ -89,14 +91,4 @@ export async function updateCashboxRole(
     .returning();
 
   return updated ? mapCashboxRole(updated) : null;
-}
-
-export async function deactivateCashboxRole(id: string) {
-  const [updated] = await db
-    .update(cashbox_roleInSpecification)
-    .set({ role_name: null })
-    .where(eq(cashbox_roleInSpecification.cashbox_role_id, id))
-    .returning();
-
-  return updated ? true : false;
 }

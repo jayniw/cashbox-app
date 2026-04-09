@@ -4,6 +4,7 @@ import {
   listCashboxTerminalPartners,
 } from '@/lib/crud/specification/cashbox_terminal_partner';
 import { parseJsonRequestBody } from '@/lib/api/parseJsonRequest';
+import { getRequestUserId } from '@/lib/api/audit';
 import {
   cashboxTerminalPartnerCreateSchema,
   cashboxTerminalPartnerQuerySchema,
@@ -37,8 +38,9 @@ export async function POST(request: Request) {
     cashboxTerminalPartnerCreateSchema,
   );
   if (parsed.errorResponse) return parsed.errorResponse;
+  const requestUserId = getRequestUserId(request);
 
-  const created = await createCashboxTerminalPartner(parsed.value);
+  const created = await createCashboxTerminalPartner({ ...parsed.value, userId: requestUserId });
   return NextResponse.json(created, { status: 201 });
 }
 

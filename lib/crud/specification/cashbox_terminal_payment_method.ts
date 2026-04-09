@@ -82,7 +82,7 @@ export async function createCashboxTerminalPaymentMethod(
       cashbox_terminal_id: payload.cashboxTerminalId,
       cashbox_payment_method_id: payload.cashboxPaymentMethodId,
       is_active: payload.isActive ?? true,
-      user_id: payload.userId ?? null,
+      ...(payload.userId !== undefined ? { user_id: payload.userId } : {}),
     })
     .returning();
 
@@ -119,10 +119,6 @@ export async function updateCashboxTerminalPaymentMethod(
 
   if (payload.isActive !== undefined) {
     updates.is_active = payload.isActive;
-  }
-
-  if (payload.userId !== undefined) {
-    updates.user_id = payload.userId;
   }
 
   if (Object.keys(updates).length) {

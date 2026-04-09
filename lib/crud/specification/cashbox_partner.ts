@@ -61,7 +61,7 @@ export async function createCashboxPartner(payload: CashboxPartnerCreate) {
     url: payload.url ?? null,
     tran_id: payload.tranId ?? null,
     tran_period: payload.tranPeriod ?? null,
-    user_id: payload.userId ?? null,
+    ...(payload.userId !== undefined ? { user_id: payload.userId } : {}),
   };
 
   const [created] = await db
@@ -96,7 +96,6 @@ export async function updateCashboxPartner(
   if (payload.tranId !== undefined) updates.tran_id = payload.tranId ?? null;
   if (payload.tranPeriod !== undefined)
     updates.tran_period = payload.tranPeriod;
-  if (payload.userId !== undefined) updates.user_id = payload.userId;
 
   if (Object.keys(updates).length) {
     updates.tran_date = new Date().toISOString();

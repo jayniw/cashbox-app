@@ -68,7 +68,7 @@ export async function createCashboxUser(payload: CashboxUserCreate) {
     user_status: payload.userStatus ?? 'Active',
     user_email: payload.userEmail ?? null,
     user_phone: payload.userPhone ?? null,
-    user_id: payload.userId ?? null,
+    ...(payload.userId !== undefined ? { user_id: payload.userId } : {}),
   };
 
   const [created] = await db
@@ -103,7 +103,6 @@ export async function updateCashboxUser(
     updates.user_email = payload.userEmail ?? null;
   if (payload.userPhone !== undefined)
     updates.user_phone = payload.userPhone ?? null;
-  if (payload.userId !== undefined) updates.user_id = payload.userId;
 
   if (Object.keys(updates).length) {
     updates.tran_date = new Date().toISOString();

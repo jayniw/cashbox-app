@@ -28,8 +28,10 @@ export async function PATCH(request: Request, context: Params) {
   const { id } = await context.params;
   const parsed = await parseJsonRequestBody(request, cashboxUserUpdateSchema);
   if (parsed.errorResponse) return parsed.errorResponse;
+  const updatePayload = { ...parsed.value } as any;
+  delete updatePayload.userId;
 
-  const updated = await updateCashboxUser(id, parsed.value);
+  const updated = await updateCashboxUser(id, updatePayload);
 
   if (updated === null) {
     return NextResponse.json(

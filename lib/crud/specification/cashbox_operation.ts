@@ -72,7 +72,7 @@ export async function createCashboxOperation(payload: CashboxOperationCreate) {
     is_active: payload.isActive ?? true,
     tran_id: payload.tranId ?? null,
     tran_period: payload.tranPeriod ?? null,
-    user_id: payload.userId ?? null,
+    ...(payload.userId !== undefined ? { user_id: payload.userId } : {}),
   };
 
   const [created] = await db
@@ -116,10 +116,6 @@ export async function updateCashboxOperation(
 
   if (payload.tranPeriod !== undefined) {
     updates.tran_period = payload.tranPeriod;
-  }
-
-  if (payload.userId !== undefined) {
-    updates.user_id = payload.userId;
   }
 
   if (Object.keys(updates).length) {

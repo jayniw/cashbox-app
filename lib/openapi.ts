@@ -13,6 +13,18 @@ import { cashboxTerminalOperationOpenApi } from '@/app/api/specification/cashbox
 import { cashboxTerminalOperationByIdOpenApi } from '@/app/api/specification/cashbox_terminal_operation/[id]/route';
 import { cashboxTerminalPaymentMethodOpenApi } from '@/app/api/specification/cashbox_terminal_payment_method/route';
 import { cashboxTerminalPaymentMethodByIdOpenApi } from '@/app/api/specification/cashbox_terminal_payment_method/[id]/route';
+import { cashboxRolePartnerOpenApi } from '@/app/api/specification/cashbox_role_partner/route';
+import { cashboxRolePartnerByIdOpenApi } from '@/app/api/specification/cashbox_role_partner/[id]/route';
+import { cashboxRoleOperationOpenApi } from '@/app/api/specification/cashbox_role_operation/route';
+import { cashboxRoleOperationByIdOpenApi } from '@/app/api/specification/cashbox_role_operation/[id]/route';
+import { cashboxRolePaymentMethodOpenApi } from '@/app/api/specification/cashbox_role_payment_method/route';
+import { cashboxRolePaymentMethodByIdOpenApi } from '@/app/api/specification/cashbox_role_payment_method/[id]/route';
+import { cashboxPartnerPaymentMethodOpenApi } from '@/app/api/specification/cashbox_partner_payment_method/route';
+import { cashboxPartnerPaymentMethodByIdOpenApi } from '@/app/api/specification/cashbox_partner_payment_method/[id]/route';
+import { cashboxUserRoleOpenApi } from '@/app/api/specification/cashbox_user_role/route';
+import { cashboxUserRoleByIdOpenApi } from '@/app/api/specification/cashbox_user_role/[id]/route';
+import { cashboxUserTerminalOpenApi } from '@/app/api/specification/cashbox_user_terminal/route';
+import { cashboxUserTerminalByIdOpenApi } from '@/app/api/specification/cashbox_user_terminal/[id]/route';
 import { cashboxOperationOpenApi } from '@/app/api/specification/cashbox_operation/route';
 import { cashboxOperationByIdOpenApi } from '@/app/api/specification/cashbox_operation/[id]/route';
 import { cashboxUserOpenApi } from '@/app/api/specification/cashbox_user/route';
@@ -300,6 +312,18 @@ const routes: OpenApiRoute[] = [
   cashboxTerminalOperationByIdOpenApi,
   cashboxTerminalPaymentMethodOpenApi,
   cashboxTerminalPaymentMethodByIdOpenApi,
+  cashboxRolePartnerOpenApi,
+  cashboxRolePartnerByIdOpenApi,
+  cashboxRoleOperationOpenApi,
+  cashboxRoleOperationByIdOpenApi,
+  cashboxRolePaymentMethodOpenApi,
+  cashboxRolePaymentMethodByIdOpenApi,
+  cashboxPartnerPaymentMethodOpenApi,
+  cashboxPartnerPaymentMethodByIdOpenApi,
+  cashboxUserRoleOpenApi,
+  cashboxUserRoleByIdOpenApi,
+  cashboxUserTerminalOpenApi,
+  cashboxUserTerminalByIdOpenApi,
   cashboxOperationOpenApi,
   cashboxOperationByIdOpenApi,
   cashboxUserOpenApi,

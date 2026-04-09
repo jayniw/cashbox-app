@@ -60,7 +60,7 @@ export async function createCashboxPaymentMethod(
     .values({
       payment_method_name: payload.paymentMethodName,
       is_active: payload.isActive ?? true,
-      user_id: payload.userId ?? null,
+      ...(payload.userId !== undefined ? { user_id: payload.userId } : {}),
     })
     .returning();
 
@@ -90,10 +90,6 @@ export async function updateCashboxPaymentMethod(
 
   if (payload.isActive !== undefined) {
     updates.is_active = payload.isActive;
-  }
-
-  if (payload.userId !== undefined) {
-    updates.user_id = payload.userId;
   }
 
   if (Object.keys(updates).length) {

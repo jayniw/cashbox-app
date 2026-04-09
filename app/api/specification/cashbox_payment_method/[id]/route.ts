@@ -34,8 +34,10 @@ export async function PATCH(request: Request, context: Params) {
     cashboxPaymentMethodUpdateSchema,
   );
   if (parsed.errorResponse) return parsed.errorResponse;
+  const updatePayload = { ...parsed.value } as any;
+  delete updatePayload.userId;
 
-  const updated = await updateCashboxPaymentMethod(id, parsed.value);
+  const updated = await updateCashboxPaymentMethod(id, updatePayload);
 
   if (updated === null) {
     return NextResponse.json(

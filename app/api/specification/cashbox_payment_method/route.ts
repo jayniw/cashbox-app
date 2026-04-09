@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { parseJsonRequestBody } from '@/lib/api/parseJsonRequest';
+import { getRequestUserId } from '@/lib/api/audit';
 import {
   createCashboxPaymentMethod,
   listCashboxPaymentMethods,
@@ -33,8 +34,9 @@ export async function POST(request: Request) {
     cashboxPaymentMethodCreateSchema,
   );
   if (parsed.errorResponse) return parsed.errorResponse;
+  const requestUserId = getRequestUserId(request);
 
-  const created = await createCashboxPaymentMethod(parsed.value);
+  const created = await createCashboxPaymentMethod({ ...parsed.value, userId: requestUserId });
   return NextResponse.json(created, { status: 201 });
 }
 

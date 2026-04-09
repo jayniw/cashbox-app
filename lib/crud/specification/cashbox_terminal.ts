@@ -1,6 +1,7 @@
 import { sql, and, type SQL, eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { cashbox_terminalInSpecification } from '@/lib/schema/schema';
+import { formatTranPeriod } from '@/lib/date_utils';
 import type {
   CashboxTerminalCreate,
   CashboxTerminalResponse,
@@ -78,12 +79,6 @@ function parseGeoPoint(value: string | null | undefined) {
   return sql`point(${x}, ${y})`;
 }
 
-function formatTranPeriod(date = new Date()) {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  return `${year}${month}`;
-}
-
 export async function createCashboxTerminal(payload: CashboxTerminalCreate) {
   const now = new Date();
   const [created] = await db
@@ -94,7 +89,7 @@ export async function createCashboxTerminal(payload: CashboxTerminalCreate) {
       geo_point: parseGeoPoint(payload.geoPoint),
       geo_url: payload.geoUrl ?? null,
       is_active: payload.isActive ?? true,
-      user_id: payload.userId ?? null,
+      ...(payload.userId !== undefined ? { user_id: payload.userId } : {}),
       tran_date: now.toISOString(),
       tran_period: formatTranPeriod(now),
     })
@@ -127,7 +122,6 @@ export async function updateCashboxTerminal(
       payload.geoPoint === null ? null : parseGeoPoint(payload.geoPoint);
   if (payload.geoUrl !== undefined) updates.geo_url = payload.geoUrl ?? null;
   if (payload.isActive !== undefined) updates.is_active = payload.isActive;
-  if (payload.userId !== undefined) updates.user_id = payload.userId;
 
   if (Object.keys(updates).length) {
     const now = new Date();

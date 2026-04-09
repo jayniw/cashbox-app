@@ -13,7 +13,8 @@ Este skill crea un CRUD completo para una tabla especificada siguiendo los linea
 Usa este skill cuando necesitas generar desde cero un API REST completo dentro de `app/api/<schema>/` para una tabla nueva de la base de datos, con:
 
 - rutas de listado y creación
-- rutas por ID para leer, actualizar y eliminar
+- rutas por ID para leer y actualizar
+- rutas por ID para eliminar sólo si la tabla tiene columna `status` o `is_active`
 - validación de entrada con Zod
 - mapeo de respuestas a camelCase
 - metadata para OpenAPI/Swagger
