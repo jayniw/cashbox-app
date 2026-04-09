@@ -7,6 +7,10 @@ import { cashboxTerminalOpenApi } from '@/app/api/specification/cashbox_terminal
 import { cashboxTerminalByIdOpenApi } from '@/app/api/specification/cashbox_terminal/[id]/route';
 import { cashboxPaymentMethodOpenApi } from '@/app/api/specification/cashbox_payment_method/route';
 import { cashboxPaymentMethodByIdOpenApi } from '@/app/api/specification/cashbox_payment_method/[id]/route';
+import { cashboxPaymentGatewayOpenApi } from '@/app/api/specification/cashbox_payment_gateway/route';
+import { cashboxPaymentGatewayByIdOpenApi } from '@/app/api/specification/cashbox_payment_gateway/[id]/route';
+import { cashboxPaymentMethodProviderOpenApi } from '@/app/api/specification/cashbox_payment_method_provider/route';
+import { cashboxPaymentMethodProviderByIdOpenApi } from '@/app/api/specification/cashbox_payment_method_provider/[id]/route';
 import { cashboxTerminalPartnerOpenApi } from '@/app/api/specification/cashbox_terminal_partner/route';
 import { cashboxTerminalPartnerByIdOpenApi } from '@/app/api/specification/cashbox_terminal_partner/[id]/route';
 import { cashboxTerminalOperationOpenApi } from '@/app/api/specification/cashbox_terminal_operation/route';
@@ -306,6 +310,10 @@ const routes: OpenApiRoute[] = [
   cashboxTerminalByIdOpenApi,
   cashboxPaymentMethodOpenApi,
   cashboxPaymentMethodByIdOpenApi,
+  cashboxPaymentGatewayOpenApi,
+  cashboxPaymentGatewayByIdOpenApi,
+  cashboxPaymentMethodProviderOpenApi,
+  cashboxPaymentMethodProviderByIdOpenApi,
   cashboxTerminalPartnerOpenApi,
   cashboxTerminalPartnerByIdOpenApi,
   cashboxTerminalOperationOpenApi,
