@@ -24,7 +24,6 @@ import {
   TerminalSquareIcon,
   UserIcon,
   UserKeyIcon,
-  UsersIcon,
 } from 'lucide-react';
 
 const data = {
@@ -55,7 +54,7 @@ const data = {
       title: 'Partners',
     },
     {
-      title: 'Partners',
+      title: 'Socios',
       url: '/dashboard/partners',
       icon: <HandshakeIcon />,
     },
@@ -63,6 +62,12 @@ const data = {
       title: 'Operaciones',
       url: '/dashboard/operations',
       icon: <TerminalIcon />,
+    },
+    { title: 'Payment methods' },
+    {
+      title: 'Métodos de pago',
+      url: '/dashboard/payment-methods',
+      icon: <PackageIcon />,
     },
     {
       title: 'Providers',
