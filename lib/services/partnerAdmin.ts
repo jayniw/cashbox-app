@@ -7,7 +7,7 @@ import { fetchJson, type SelectOption } from './api';
 
 export type { CashboxPartnerResponse } from '@/types/db/specification/cashboxPartner';
 
-export async function listPartners() {
+export async function listPartners(): Promise<SelectOption[]> {
   return fetchJson<Array<Record<string, unknown>>>(
     '/api/specification/cashbox_partner',
   ).then((items) =>

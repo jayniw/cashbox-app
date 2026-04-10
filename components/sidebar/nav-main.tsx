@@ -22,7 +22,7 @@ export function NavMain({
 }: {
   items: {
     title: string;
-    url: string;
+    url?: string;
     icon?: React.ReactNode;
     isActive?: boolean;
     items?: {
@@ -33,10 +33,19 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const hasChildren = item.items?.length;
+          const hasLink = Boolean(item.url);
+          const onlyTitle = !hasLink && !hasChildren;
+
+          if (onlyTitle) {
+            return (
+              <SidebarGroupLabel key={item.title}>
+                {item.title}
+              </SidebarGroupLabel>
+            );
+          }
 
           if (!hasChildren) {
             return (
@@ -45,7 +54,7 @@ export function NavMain({
                   asChild
                   tooltip={item.title}
                 >
-                  <a href={item.url}>
+                  <a href={item.url ?? '#'}>
                     {item.icon}
                     <span>{item.title}</span>
                   </a>

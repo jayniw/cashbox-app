@@ -19,6 +19,7 @@ interface SearchSelectProps {
   placeholder?: string;
   disabled?: boolean;
   description?: string;
+  multiple?: boolean;
 }
 
 export function SearchSelect({
@@ -29,6 +30,7 @@ export function SearchSelect({
   placeholder = 'Buscar...',
   disabled = false,
   description,
+  multiple = true,
 }: SearchSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
@@ -72,7 +74,12 @@ export function SearchSelect({
       return;
     }
 
-    onChange([...selectedValues, value]);
+    if (multiple) {
+      onChange([...selectedValues, value]);
+    } else {
+      onChange([value]);
+      setOpen(false);
+    }
   };
 
   const removeValue = (value: string) => {

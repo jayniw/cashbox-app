@@ -19,12 +19,14 @@ import {
   GalleryVerticalEndIcon,
   HandshakeIcon,
   PackageIcon,
+  SignpostIcon,
   TerminalIcon,
+  TerminalSquareIcon,
+  UserIcon,
+  UserKeyIcon,
   UsersIcon,
 } from 'lucide-react';
-import { NavDocumentation } from './sidebar/nav-documentation';
 
-// This is sample data.
 const data = {
   user: {
     name: 'shadcn',
@@ -51,65 +53,59 @@ const data = {
   navMain: [
     {
       title: 'Partners',
-      url: '#',
+    },
+    {
+      title: 'Partners',
+      url: '/dashboard/partners',
       icon: <HandshakeIcon />,
-      isActive: true,
-      items: [
-        {
-          title: 'Partners',
-          url: '/dashboard/partners',
-        },
-        {
-          title: 'Operaciones',
-          url: '/dashboard/operations',
-        },
-      ],
+    },
+    {
+      title: 'Operaciones',
+      url: '/dashboard/operations',
+      icon: <TerminalIcon />,
+    },
+    {
+      title: 'Providers',
     },
     {
       title: 'Proveedores',
-      url: '#',
+      url: '/dashboard/payment-method-providers',
       icon: <PackageIcon />,
-      isActive: true,
-      items: [
-        {
-          title: 'Proveedores',
-          url: '/dashboard/payment-method-providers',
-        },
-        {
-          title: 'Gateways',
-          url: '/dashboard/payment-gateways',
-        },
-      ],
+    },
+    {
+      title: 'Gateways',
+      url: '/dashboard/payment-gateways',
+      icon: <SignpostIcon />,
+    },
+    {
+      title: 'Users',
     },
     {
       title: 'Usuarios',
-      url: '#',
-      icon: <UsersIcon />,
-      isActive: true,
-      items: [
-        {
-          title: 'Usuarios',
-          url: '/dashboard/users',
-        },
-        {
-          title: 'Roles',
-          url: '/dashboard/roles',
-        },
-        {
-          title: 'Terminales',
-          url: '/dashboard/terminals',
-        },
-      ],
+      url: '/dashboard/users',
+      icon: <UserIcon />,
     },
-  ],
-  documentation: [
     {
-      name: 'Swagger UI',
+      title: 'Roles',
+      url: '/dashboard/roles',
+      icon: <UserKeyIcon />,
+    },
+    {
+      title: 'Terminales',
+      url: '/dashboard/terminals',
+      icon: <TerminalSquareIcon />,
+    },
+
+    {
+      title: 'Documentation',
+    },
+    {
+      title: 'Swagger UI',
       url: '/docs',
       icon: <BookOpenIcon />,
     },
     {
-      name: 'Open Api',
+      title: 'Open Api',
       url: '/api/openapi',
       icon: <BracesIcon />,
     },
@@ -127,7 +123,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocumentation documentation={data.documentation} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

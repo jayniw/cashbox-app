@@ -1,6 +1,6 @@
 import { fetchJson, type SelectOption } from './api';
 
-export async function listPaymentMethods() {
+export async function listPaymentMethods(): Promise<SelectOption[]> {
   return fetchJson<Array<Record<string, unknown>>>(
     '/api/specification/cashbox_payment_method',
   ).then((items) =>
@@ -20,4 +20,8 @@ export async function listPaymentMethods() {
       };
     }),
   );
+}
+
+export async function listPaymentMethodOptions(): Promise<SelectOption[]> {
+  return listPaymentMethods();
 }
